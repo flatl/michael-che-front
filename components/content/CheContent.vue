@@ -11,6 +11,7 @@
         :title="list[selectedItemIndex].title"
         :description="list[selectedItemIndex].description"
         :image-index="selectedImageIndex"
+        @close="handleClose"
       />
       <content-item
         v-else
@@ -64,7 +65,7 @@ export default {
     rows() {
       if (!this.windowWidth) return [[]];
       
-      const isMobile = this.windowWidth < 600;
+      const isMobile = this.windowWidth <= 600;
       let padding, elementWidth, elementMargin;
 
       if (isMobile) {
@@ -73,9 +74,8 @@ export default {
         [padding, elementWidth, elementMargin] = [40, 264 + 20, 20];
       }
 
-      const contentWidth = this.windowWidth > 1440 ? 1440 : this.windowWidth;
       const elementsPerRow = Math.trunc(
-        (contentWidth - padding + elementMargin) / elementWidth
+        (this.windowWidth - padding + elementMargin) / elementWidth
       );
       const rowsCount = Math.ceil(this.allImages.length / elementsPerRow);
       const rows = Array(rowsCount + 1).fill(null).map(
@@ -142,6 +142,13 @@ export default {
     },
 
     handleClickItem(item) {
+      const isCurrentItemSelected = item.itemIndex === this.selectedItemIndex &&
+        item.imageIndex === this.selectedImageIndex;
+      
+      if (isCurrentItemSelected) {
+        return this.handleClose();
+      }
+
       this.selectedItemIndex = item.itemIndex;
       this.selectedImageIndex = item.imageIndex;
     },
@@ -149,35 +156,46 @@ export default {
     handleResize(event) {
       this.windowWidth = event.target.innerWidth;
     },
+
+    handleClose() {
+      this.selectedItemIndex = -1;
+      this.selectedImageIndex = -1;
+    },
   }
 };
 </script>
 
 <style lang="scss" scoped>
 .content {
+  overflow-x: visible;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  grid-row-gap: 20px;
+  align-items: center;
   width: 100%;
-  max-width: 1440px;
-  align-self: center;
-  padding: 20px 0 0 20px;
+  padding: 20px;
 
   &__row {
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: center;
+    grid-column-gap: 20px;
     width: 100%;
 
     .content__item:last-child {
       margin-right: 0;
+    }
+
+    &.slider {
+      overflow-x: visible;
     }
   }
 
   &__item {
     width: 264px;
     height: 264px;
-    margin: 0 20px 20px 0;
+    margin: 0;
     border-radius: 8px;
     user-select: none;
 
@@ -191,6 +209,17 @@ export default {
       height: 100%;
       object-fit: cover;
       border-radius: 8px;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .content {
+    grid-row-gap: 6px;
+    padding: 6px;
+
+    &__row {
+      grid-column-gap: 6px;
     }
   }
 }

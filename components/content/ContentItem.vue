@@ -29,7 +29,7 @@ export default {
 .content-item {
   width: 264px;
   height: 264px;
-  margin: 0 20px 20px 0;
+  margin: 0;
   border-radius: 8px;
   user-select: none;
 
@@ -45,7 +45,6 @@ export default {
   .content-item {
     width: 112px;
     height: 112px;
-    margin: 0 6px 6px 0;
   }
 }
 </style>

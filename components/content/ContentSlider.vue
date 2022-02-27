@@ -1,6 +1,10 @@
 <template>
   <div class="content-slider">
-    <che-slider :items="items" :active-element="imageIndex" />
+    <che-slider
+      :items="items"
+      :active-element="imageIndex"
+      @close="handleClose"
+    />
     <h3 class="content-slider__title">
       {{ title }}
     </h3>
@@ -45,6 +49,12 @@ export default {
       },
     };
   },
+
+  methods: {
+    handleClose() {
+      this.$emit('close');
+    },
+  },
 };
 </script>
 
@@ -71,6 +81,7 @@ export default {
 }
 
 .content-slider {
+  overflow-x: visible;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -91,6 +102,7 @@ export default {
     font-weight: 400;
     line-height: 20px;
     color: #333;
+    margin: 0;
   }
 
   &__slide {
