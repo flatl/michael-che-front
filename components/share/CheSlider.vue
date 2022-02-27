@@ -21,6 +21,10 @@
           @mousedown="handleMouseDown"
           @mouseup="handleMouseUp"
           @mouseleave="(e) => isMouseDowned && handleMouseUp(e)"
+          @touchstart="handleMouseDown"
+          @touchmove="handleMouseOver"
+          @touchend="handleMouseUp"
+          @click="handleClickActiveSlide(index)"
         >
           <nav v-if="items.length > 1" class="che-slider__nav">
             <span
@@ -30,7 +34,7 @@
                 'che-slider__nav__item',
                 { active: index === activeSlide }
               ]"
-              @click="handleClickNavItem(index)"
+              @click.stop="handleClickNavItem(index)"
             />
           </nav>
         </div>
@@ -40,7 +44,7 @@
           :style="{
             'background-image': `url(${getImageUrl(slide)})`,
           }"
-          @mouseup="handleClickSlide(index)"
+          @click.stop="handleClickSlide(index)"
         />
       </div>
 
@@ -94,20 +98,22 @@ export default {
 
   methods: {
     handleMouseDown(event) {
-      console.log('down')
       this.isMouseDowned = true;
-      this.startDragOverX = event.clientX;
+      const clientX = event.clientX || event.changedTouches.item(0).clientX;
+      this.startDragOverX = clientX;
     },
 
     handleMouseOver(event) {
       if (!this.isMouseDowned) return;
       this.counter++
-      this.sliderOffsetX = this.startDragOverX - event.clientX;
+      const clientX = event.clientX || event.changedTouches.item(0).clientX
+      this.sliderOffsetX = this.startDragOverX - clientX;
     },
 
     handleMouseUp(event) {
-      const differenceX = this.startDragOverX - event.clientX;
-      console.log('difference', differenceX)
+      const clientX = event.clientX || event.changedTouches.item(0).clientX;
+      const differenceX = this.startDragOverX - clientX;
+
       if (Math.abs(differenceX) > 100) {
         event.stopImmediatePropagation();
         this.changeSlide(differenceX);
@@ -117,9 +123,14 @@ export default {
     },
 
     handleClickSlide(slideIndex) {
-      console.log('click handler', slideIndex !== this.activeSlide)
       if (slideIndex !== this.activeSlide) {
         this.activeSlide = slideIndex;
+      }
+    },
+
+    handleClickActiveSlide(index) {
+      if (index === this.activeSlide) {
+        this.$emit('close');
       }
     },
 
@@ -148,8 +159,8 @@ export default {
 
 <style lang="scss" scoped>
 .che-slider {
-  overflow: hidden;
   position: relative;
+  overflow-x: visible;
   width: 100%;
   height: 600px;
   padding: 0 0 0 calc(50% - 300px);
@@ -168,20 +179,24 @@ export default {
     border-radius: 8px;
     background-repeat: no-repeat;
     background-size: cover;
+    transition:
+      width .5s ease-out,
+      height .5s ease-out;
+    animation-name: shrink;
+    animation-duration: .4s;
+    animation-iteration-count: 1;
 
     &.active {
       display: flex;
       justify-content: center;
       align-items: flex-end;
       padding: 12px;
-      transition:
-        width .5s ease-out,
-        height .5s ease-out;
       animation-name: grow;
       animation-duration: .4s;
       animation-iteration-count: 1;
       min-width: 600px;
       min-height: 600px;
+    }
   }
 
   &__nav {
@@ -189,8 +204,8 @@ export default {
     flex-direction: row;
 
     &__item {
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
       margin: 0 4px 0 0;
       border-radius: 50%;
       background-color: rgba(#fff, .3);
@@ -225,6 +240,18 @@ export default {
   50% {
     min-width: 264px;
     min-height: 264px;
+  }
+}
+
+@keyframes shrink {
+  0% {
+    min-width: 600px;
+    min-height: 600px;
+  }
+
+  50% {
+    min-width: 600px;
+    min-height: 600px;
   }
 }
 </style>

@@ -238,12 +238,16 @@ export default {
 
     async submitData() {
       const data = this.$store.getters['project/editedProjectFormData'];
+      this.$toast.show('Редактируем проект..');
       const isSuccess = await this.$api.editProject(data);
 
+      this.$toast.clear();
+
       if (isSuccess) {
-        console.log('успех')
+        this.$toast.success('Проект успешно изменен', { duration: 2e3 });
+        setTimeout(() => this.$router.push('/admin'), 1e3);
       } else {
-        console.log('Произошла ошибка')
+        this.$toast.error('Ой-ой, произошла ошибка', { duration: 3e3 });
       }
     },
   },
@@ -261,7 +265,7 @@ export default {
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
-    padding: 60px 0;
+    padding: 60px 24px;
   }
 
   &__title {
